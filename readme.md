@@ -20,7 +20,7 @@ qrcode + Pillow for QR generation and logo embedding
 Neon PostgreSQL for history storage
 
 *Project Structure for setting up locally*
-
+```
 backend/
 ├── main.py            # FastAPI app, all endpoints
 ├── qr_payloads.py      # builds the encoded string per QR type
@@ -36,7 +36,7 @@ frontend/
 │   └── globals.css      # Tailwind v4 theme tokens
 └── lib/
     └── api.ts           # fetch wrapper for the backend
-
+```
 
 
 
