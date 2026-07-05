@@ -41,7 +41,7 @@ frontend/
 
 
 
-
+```
 *Running locally*
 Backend:
 bashcd backend
@@ -64,3 +64,4 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 bash: npm run dev (To start frontend)
 
 Open http://localhost:3000. The backend must be running for the live preview and save/history features to work.
+```
