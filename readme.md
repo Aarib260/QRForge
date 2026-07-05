@@ -44,7 +44,7 @@ frontend/
 ```
 *Running locally*
 Backend:
-bashcd backend
+bash: cd backend
 pip install -r requirements.txt
 
 Create backend/.env:
