@@ -1,24 +1,25 @@
-*QRForge*
+**QRForge**
 A custom QR code generator for websites, text, WiFi networks, contact cards, emails, and locations — with color/logo customization, PNG/SVG download, and a saved history.
-
+```
 *Features*
-6 QR types: Website, Text, WiFi, Contact (vCard), Email, Location
-Live preview — updates as you type, debounced
-Customization — QR color, background color, size, and an embeddable center logo
-Download as PNG or SVG
-History — saved QR codes persist in Postgres (Neon), with a slide-in drawer to browse and delete past codes
-Copy-to-clipboard on the raw encoded payload string
-
+-6 QR types: Website, Text, WiFi, Contact (vCard), Email, Location
+-Live preview — updates as you type, debounced
+-Customization — QR color, background color, size, and an embeddable center logo
+-Download as PNG or SVG
+-History — saved QR codes persist in Postgres (Neon), with a slide-in drawer to browse and delete past codes
+-Copy-to-clipboard on the raw encoded payload string
+```
+```
 *Tech stack*
-*Frontend*
-Next.js (App Router) + TypeScript
-Tailwind CSS v4
+*Frontend*:
+-Next.js (App Router) + TypeScript
+-Tailwind CSS v4
 
-*Backend*
-FastAPI
-qrcode + Pillow for QR generation and logo embedding
-Neon PostgreSQL for history storage
-
+*Backend*:
+-FastAPI
+-qrcode + Pillow for QR generation and logo embedding
+-Neon PostgreSQL for history storage
+```
 *Project Structure for setting up locally*
 ```
 backend/
