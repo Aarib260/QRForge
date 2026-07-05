@@ -1,16 +1,19 @@
 **QRForge**
 A custom QR code generator for websites, text, WiFi networks, contact cards, emails, and locations — with color/logo customization, PNG/SVG download, and a saved history.
+
+**Features**
 ```
-*Features*
--6 QR types: Website, Text, WiFi, Contact (vCard), Email, Location
--Live preview — updates as you type, debounced
--Customization — QR color, background color, size, and an embeddable center logo
--Download as PNG or SVG
--History — saved QR codes persist in Postgres (Neon), with a slide-in drawer to browse and delete past codes
--Copy-to-clipboard on the raw encoded payload string
+6 QR types: Website, Text, WiFi, Contact (vCard), Email, Location
+Live preview — updates as you type, debounced
+Customization — QR color, background color, size, and an embeddable center logo
+Download as PNG or SVG
+History — saved QR codes persist in Postgres (Neon), with a slide-in drawer to browse and delete past codes
+Copy-to-clipboard on the raw encoded payload string
 ```
+
+
+**Tech stack**
 ```
-*Tech stack*
 *Frontend*:
 -Next.js (App Router) + TypeScript
 -Tailwind CSS v4
@@ -41,9 +44,9 @@ frontend/
 
 
 
+**Running locally**
 ```
-*Running locally*
-Backend:
+*Backend*:
 bash: cd backend
 pip install -r requirements.txt
 
@@ -53,7 +56,7 @@ DATABASE_URL=postgresql://user:password@your-neon-host/dbname?sslmode=require
 bash: cd backend
 uvicorn main:app --reload --port 8000 (To start backend)
 
-Frontend:
+*Frontend*:
 bash: cd frontend
 npm install
 
