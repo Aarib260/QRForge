@@ -18,7 +18,7 @@ app = FastAPI(title="QRForge API")
 # Allow your Next.js frontend (adjust origins for prod / Vercel domain)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://qr-forge-ey4c.vercel.app"],
+    allow_origins=["http://localhost:3000", "https://your-app.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -1,5 +1,4 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-console.log("API_BASE =", API_BASE);
 
 export type QRType = "url" | "text" | "wifi" | "contact" | "email" | "location";
 
@@ -7,6 +6,21 @@ export interface PreviewResponse {
   image?: string;
   svg?: string;
   payload: string;
+}
+
+/** Shape of a single saved QR record returned by /api/qr/history */
+export interface QRHistoryItem {
+  id: number;
+  label: string | null;
+  qr_type: QRType;
+  payload: string;
+  fill_color: string;
+  back_color: string;
+  size: number;
+  has_logo: boolean;
+  image_base64: string;
+  created_at: string; // ISO string
+  expires_at: string | null;
 }
 
 export async function previewQR(params: {
@@ -69,7 +83,7 @@ export async function saveQR(params: {
   return res.json();
 }
 
-export async function getHistory() {
+export async function getHistory(): Promise<{ history: QRHistoryItem[] }> {
   const res = await fetch(`${API_BASE}/api/qr/history`);
   if (!res.ok) throw new Error("Failed to load history");
   return res.json();

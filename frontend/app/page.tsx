@@ -1,16 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { previewQR, downloadQR, saveQR, getHistory, deleteHistoryItem, QRType } from "@/lib/api";
-
-const QR_TYPES: { value: QRType; label: string; icon: string }[] = [
-  { value: "url", label: "Website", icon: "🌐" },
-  { value: "text", label: "Text", icon: "📝" },
-  { value: "wifi", label: "WiFi", icon: "📶" },
-  { value: "contact", label: "Contact", icon: "👤" },
-  { value: "email", label: "Email", icon: "📧" },
-  { value: "location", label: "Location", icon: "📍" },
-];
+import { AnimatePresence } from "framer-motion";
+import {
+  previewQR,
+  downloadQR,
+  saveQR,
+  getHistory,
+  deleteHistoryItem,
+  QRType,
+  QRHistoryItem,
+} from "@/lib/api";
+import { QR_TYPES, COLOR_PRESETS } from "@/lib/constants";
+import QRDetailModal from "@/components/QRDetailModal";
 
 type FormData = Record<string, string>;
 
@@ -28,14 +30,15 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pulse, setPulse] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const [label, setLabel] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<QRHistoryItem[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<QRHistoryItem | null>(null);
 
   function updateField(key: string, value: string) {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -71,7 +74,7 @@ export default function Home() {
       setPulse((p) => p + 1);
     } catch (e: any) {
       if (e instanceof TypeError) {
-        setError("Can't reach the server - make sure your backend is running on port 8000")
+        setError("Can't reach the server — make sure your backend is running on port 8000.");
       } else {
         setError(e.message || "Something went wrong generating the preview");
       }
@@ -86,18 +89,19 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [runPreview]);
 
-  //auto clear the save confirmation/error message after a few seconds.
+  // auto-clear the save confirmation/error message after a few seconds
   useEffect(() => {
     if (!saveMsg) return;
     const t = setTimeout(() => setSaveMsg(null), 3000);
     return () => clearTimeout(t);
   }, [saveMsg]);
+
+  // auto-clear the "Copied!" payload feedback
   useEffect(() => {
     if (!copied) return;
     const t = setTimeout(() => setCopied(false), 1500);
     return () => clearTimeout(t);
   }, [copied]);
-
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] || null;
@@ -159,7 +163,8 @@ export default function Home() {
     }
   }
 
-  async function handleDeleteHistory(id: number) {
+  async function handleDeleteHistory(id: number, e: React.MouseEvent) {
+    e.stopPropagation(); // don't also trigger the card's onClick (opening the modal)
     await deleteHistoryItem(id);
     setHistory((prev) => prev.filter((h) => h.id !== id));
   }
@@ -244,15 +249,15 @@ export default function Home() {
                   />
                 </Field>
                 {formData.security !== "nopass" && (
-                <Field label="Password">
-                  <input
-                    type="text"
-                    value={formData.password || ""}
-                    onChange={(e) => updateField("password", e.target.value)}
-                    className="forge-input"
-                  />
-                </Field>
-              )}
+                  <Field label="Password">
+                    <input
+                      type="text"
+                      value={formData.password || ""}
+                      onChange={(e) => updateField("password", e.target.value)}
+                      className="forge-input"
+                    />
+                  </Field>
+                )}
                 <Field label="Security">
                   <select
                     value={formData.security || "WPA"}
@@ -380,6 +385,23 @@ export default function Home() {
                   className="h-9 w-14"
                 />
               </div>
+              <div>
+                <label className="mb-1.5 block text-xs text-bone/50">Presets</label>
+                <div className="flex gap-1.5">
+                  {COLOR_PRESETS.map((p) => (
+                    <button
+                      key={p.name}
+                      title={p.name}
+                      onClick={() => {
+                        setFillColor(p.fill);
+                        setBackColor(p.back);
+                      }}
+                      className="h-9 w-9 rounded-md border border-steelLight transition hover:border-ember"
+                      style={{ background: `linear-gradient(135deg, ${p.fill} 50%, ${p.back} 50%)` }}
+                    />
+                  ))}
+                </div>
+              </div>
               <div className="flex-1 min-w-[160px]">
                 <label className="mb-1.5 block text-xs text-bone/50">Size — {size}</label>
                 <input
@@ -395,12 +417,7 @@ export default function Home() {
                 <label className="mb-1.5 block text-xs text-bone/50">Logo (PNG download only)</label>
                 <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-steelLight bg-steel px-4 py-2 text-sm text-bone/80 transition hover:border-ember hover:text-ember">
                   <span>{logo ? "Change logo" : "Choose logo"}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                    className="hidden"
-                  />
+                  <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
                 </label>
                 {logo && (
                   <p className="mt-1.5 max-w-[180px] truncate text-xs text-bone/40">{logo.name}</p>
@@ -426,7 +443,7 @@ export default function Home() {
             ) : (
               <div className="flex flex-col items-center gap-3 text-center">
                 <span className="text-4xl opacity-20">▦</span>
-                <p className="text-center text-sm text-bone/30">Fill in the fields to see your code.</p>
+                <p className="text-sm text-bone/30">Fill in the fields to see your code</p>
               </div>
             )}
           </div>
@@ -443,8 +460,8 @@ export default function Home() {
                 navigator.clipboard.writeText(payload);
                 setCopied(true);
               }}
-              title="Click to copy."
-              className="mt-4 max-w-full overflow-x-auto rounded-md bg-plate px-3 py-2 font-mono text-xs text-amber/80 transition hover:border-ember border border-transparent text-left"
+              title="Click to copy"
+              className="mt-4 max-w-full overflow-x-auto rounded-md border border-transparent bg-plate px-3 py-2 text-left font-mono text-xs text-amber/80 transition hover:border-ember"
             >
               {copied ? "Copied!" : payload}
             </button>
@@ -493,10 +510,10 @@ export default function Home() {
           className="fixed inset-0 z-50 flex justify-end bg-black/60"
           onClick={() => setHistoryOpen(false)}
         >
-          <div 
+          <div
             className="h-full w-full max-w-sm overflow-y-auto bg-plate p-6 border-l border-steelLight"
             onClick={(e) => e.stopPropagation()}
-          > 
+          >
             <div className="mb-6 flex items-center justify-between">
               <h2 className="font-display text-lg font-bold text-bone">My QR Codes</h2>
               <button onClick={() => setHistoryOpen(false)} className="text-bone/50 hover:text-ember">
@@ -508,10 +525,18 @@ export default function Home() {
             ) : (
               <ul className="space-y-4">
                 {history.map((h) => (
-                  <li key={h.id} className="flex items-center gap-3 rounded-md border border-steelLight p-3">
+                  <li
+                    key={h.id}
+                    onClick={() => setSelectedItem(h)}
+                    className="flex cursor-pointer items-center gap-3 rounded-md border border-steelLight p-3 transition hover:border-ember/60 hover:bg-steel/30"
+                  >
                     {h.image_base64 && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={h.image_base64} alt={h.label || h.qr_type} className="h-12 w-12 rounded bg-white p-1" />
+                      <img
+                        src={h.image_base64}
+                        alt={h.label || h.qr_type}
+                        className="h-12 w-12 rounded bg-white p-1"
+                      />
                     )}
                     <div className="flex-1">
                       <p className="text-sm text-bone">{h.label || h.qr_type}</p>
@@ -520,7 +545,7 @@ export default function Home() {
                       </p>
                     </div>
                     <button
-                      onClick={() => handleDeleteHistory(h.id)}
+                      onClick={(e) => handleDeleteHistory(h.id, e)}
                       className="text-xs text-bone/40 hover:text-ember"
                     >
                       Delete
@@ -532,6 +557,14 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* QR detail modal — AnimatePresence drives the enter/exit animation
+          as selectedItem toggles between an item and null */}
+      <AnimatePresence>
+        {selectedItem && (
+          <QRDetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+        )}
+      </AnimatePresence>
     </main>
   );
 }
