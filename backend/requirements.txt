@@ -1,2 +1,8 @@
+fastapi
+uvicorn
+python-dotenv
+python-multipart
 qrcode
-pillow
+Pillow
+SQLAlchemy
+psycopg2-binary
